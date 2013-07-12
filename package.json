@@ -6,8 +6,8 @@
         "test": "grunt test"
     },
     "dependencies": {
-        "node-restify-validation": "git+ssh://git@github.com:z0mt3c/node-restify-validation.git",
-        "node-restify-swagger": "git+ssh://git@github.com:z0mt3c/node-restify-swagger.git",
+        "node-restify-validation": "git+https://git@github.com/z0mt3c/node-restify-validation.git",
+        "node-restify-swagger": "git+https://git@github.com/z0mt3c/node-restify-swagger.git",
         "underscore":"*",
         "restify":"*"
     },
