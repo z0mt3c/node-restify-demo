@@ -8,13 +8,13 @@
     "dependencies": {
         "node-restify-validation": "git+https://git@github.com/z0mt3c/node-restify-validation.git",
         "node-restify-swagger": "git+https://git@github.com/z0mt3c/node-restify-swagger.git",
-        "underscore":"*",
-        "restify":"*"
+        "underscore": "*",
+        "restify": "*"
     },
     "devDependencies": {
         "grunt": "~0.4.1",
         "grunt-contrib-jshint": "~0.6.0",
-        "grunt-contrib-watch": "~0.4.4.",
+        "grunt-contrib-watch": "~0.4.4",
         "grunt-mocha-cli": "~1.0.1",
         "matchdep": "~0.1.1"
     }
