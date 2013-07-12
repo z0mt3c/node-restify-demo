@@ -1,0 +1,21 @@
+{
+    "name": "node-restify-demo",
+    "version": "0.0.1",
+    "scripts": {
+        "start": "node server.js",
+        "test": "grunt test"
+    },
+    "dependencies": {
+        "node-restify-validation": "git+ssh://git@github.com:z0mt3c/node-restify-validation.git",
+        "node-restify-swagger": "git+ssh://git@github.com:z0mt3c/node-restify-swagger.git",
+        "underscore":"*",
+        "restify":"*"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.1",
+        "grunt-contrib-jshint": "~0.3.0",
+        "grunt-contrib-watch": "~0.3.1",
+        "grunt-mocha-cli": "~1.0.1",
+        "matchdep": "~0.1.1"
+    }
+}
