@@ -11,9 +11,11 @@ restifySwagger.configure(server);
  * Test Controller
  */
 server.get({url: '/hello/:name', validation: {
-    test: { isRequired: true, isIn: ['test','asdf'], scope: 'query' }
+    status: { isRequired: true, isIn: ['foo','bar'], scope: 'query' },
+    email: { isRequired: false, isEmail: true, scope: 'query' },
+    age: { isRequired: true, isInt: true, scope: 'query' }
 }}, function (req, res, next) {
-    res.send(req.params.name);
+    res.send(req.params);
 });
 
 /**
