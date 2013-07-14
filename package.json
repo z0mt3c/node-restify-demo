@@ -20,13 +20,13 @@
         "url": "https://github.com/z0mt3c/node-restify-demo/issues"
     },
     "scripts": {
-        "start": "node server.js",
+        "start": "node lib/server.js",
         "test": "grunt test",
         "blanket": {
             "pattern": "//^(?!.*node_modules.*$).*lib\//"
         }
     },
-    "main": "server",
+    "main": "lib/server",
     "readmeFilename": "README.md",
     "dependencies": {
         "node-restify-validation": "git+https://git@github.com/z0mt3c/node-restify-validation.git",
