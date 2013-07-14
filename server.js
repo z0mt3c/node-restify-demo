@@ -4,7 +4,7 @@ var restifySwagger = require('node-restify-swagger');
 
 var server = restify.createServer();
 server.use(restify.queryParser());
-server.use(restifyValidation.validationPlugin());
+server.use(restifyValidation.validationPlugin( { errorsAsArray: false}));
 restifySwagger.configure(server);
 
 /**
