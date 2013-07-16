@@ -4,6 +4,7 @@
     "author": {
         "name": "Timo Behrmann"
     },
+    "license" : "MIT",
     "keywords": [
         "rest",
         "api",
@@ -29,8 +30,8 @@
     "main": "lib/server",
     "readmeFilename": "README.md",
     "dependencies": {
-        "node-restify-validation": "git+https://git@github.com/z0mt3c/node-restify-validation.git",
-        "node-restify-swagger": "git+https://git@github.com/z0mt3c/node-restify-swagger.git",
+        "node-restify-validation": "*",
+        "node-restify-swagger": "*",
         "underscore": "*",
         "restify": "*"
     },
