@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Swagger UI</title>
-    <link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
+    <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
     <link href='css/hightlight.default.css' media='screen' rel='stylesheet' type='text/css'/>
     <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
     <script src='lib/jquery-1.8.0.min.js' type='text/javascript'></script>
@@ -31,13 +31,6 @@
                         console.log(swaggerApi);
                         console.log(swaggerUi);
                     }
-                    $('div.description span span.head').click(function() {
-                        var expander = $(this).parent().children('span.expand');
-
-                        if (expander.children().length > 0) {
-                            expander.slideToggle();
-                        }
-                    });
                   $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
                 },
                 onFailure: function(data) {
@@ -58,19 +51,19 @@
 <body>
 <div id='header'>
     <div class="swagger-ui-wrap">
-        <a id="logo" href="/docs/index.html">swagger</a>
+        <a id="logo" href="http://swagger.wordnik.com">swagger</a>
 
         <form id='api_selector'>
-            <div class='input icon-btn' style="display:none;">
+            <div class='input icon-btn'>
                 <img id="show-pet-store-icon" src="images/pet_store_api.png" title="Show Swagger Petstore Example Apis">
             </div>
-            <div class='input icon-btn' style="display:none;">
+            <div class='input icon-btn'>
                 <img id="show-wordnik-dev-icon" src="images/wordnik_api.png" title="Show Wordnik Developer Apis">
             </div>
             <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl"
-                                      type="text"  style="display:none;"/></div>
+                                      type="text"/></div>
             <div class='input'><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text"/></div>
-          <div class='input'><a id="explore" href="#">Explore</a></div>
+            <div class='input'><a id="explore" href="#">Explore</a></div>
         </form>
     </div>
 </div>

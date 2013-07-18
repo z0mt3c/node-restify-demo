@@ -63,7 +63,11 @@
           }
           _this.basePath = _this.basePath.replace(/\/$/, '');
         } else {
-          _this.basePath = _this.discoveryUrl.substring(0, _this.discoveryUrl.lastIndexOf('/'));
+          if (_this.discoveryUrl.indexOf('?') > 0) {
+            _this.basePath = _this.discoveryUrl.substring(0, _this.discoveryUrl.lastIndexOf('?'));
+          } else {
+            _this.basePath = _this.discoveryUrl;
+          }
           log('derived basepath from discoveryUrl as ' + _this.basePath);
         }
         _this.apis = {};
@@ -88,20 +92,6 @@
           }
         } else {
           _ref1 = response.apis;
-
-          function dynamicSort(property) {
-              var sortOrder = 1;
-              if(property[0] === "-") {
-                  sortOrder = -1;
-                  property = property.substr(1, property.length - 1);
-              }
-              return function (a,b) {
-                  var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-                  return result * sortOrder;
-              }
-          };
-
-          _ref1.sort(dynamicSort('path'));
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             resource = _ref1[_j];
             res = new SwaggerResource(resource, _this);
@@ -212,8 +202,10 @@
       this.api = api;
       this.path = this.api.resourcePath != null ? this.api.resourcePath : resourceObj.path;
       this.description = resourceObj.description;
-      this.name = this.path.replace('/swagger/', '');
+      parts = this.path.split("/");
+      this.name = parts[parts.length - 1].replace('.{format}', '');
       this.basePath = this.api.basePath;
+      console.log('bp: ' + this.basePath);
       this.operations = {};
       this.operationsArray = [];
       this.modelsArray = [];
@@ -228,6 +220,8 @@
           this.api.fail("SwaggerResources must have a path.");
         }
         this.url = this.api.suffixApiKey(this.api.basePath + this.path.replace('{format}', 'json'));
+        console.log('basePath: ' + this.api.basePath);
+        console.log('url: ' + this.url);
         this.api.progress('fetching resource ' + this.name + ': ' + this.url);
         jQuery.getJSON(this.url, function(response) {
           var endpoint, _i, _len, _ref;
@@ -273,7 +267,7 @@
     };
 
     SwaggerResource.prototype.addOperations = function(resource_path, ops) {
-      var consumes, o, op, _i, _len, _results;
+      var consumes, err, errorResponses, o, op, _i, _j, _len, _len1, _results;
       if (ops) {
         _results = [];
         for (_i = 0, _len = ops.length; _i < _len; _i++) {
@@ -282,7 +276,20 @@
           if (o.supportedContentTypes) {
             consumes = o.supportedContentTypes;
           }
-          op = new SwaggerOperation(o.nickname, resource_path, o.httpMethod, o.parameters, o.summary, o.notes, o.responseClass, o.errorResponses, this, o.consumes, o.produces);
+          errorResponses = o.responseMessages;
+          if (errorResponses) {
+            for (_j = 0, _len1 = errorResponses.length; _j < _len1; _j++) {
+              err = errorResponses[_j];
+              err.reason = err.message;
+            }
+          }
+          if (o.errorResponses) {
+            errorResponses = o.errorResponses;
+          }
+          if (o.method) {
+            o.httpMethod = o.method;
+          }
+          op = new SwaggerOperation(o.nickname, resource_path, o.httpMethod, o.parameters, o.summary, o.notes, o.responseClass, errorResponses, this, o.consumes, o.produces);
           this.operations[op.nickname] = op;
           _results.push(this.operationsArray.push(op));
         }
@@ -337,7 +344,7 @@
       return _results;
     };
 
-    SwaggerModel.prototype.getMockSignature = function(prefix, modelsToIgnore) {
+    SwaggerModel.prototype.getMockSignature = function(modelsToIgnore) {
       var classClose, classOpen, prop, propertiesStr, returnVal, strong, strongClose, stronger, _i, _j, _len, _len1, _ref, _ref1;
       propertiesStr = [];
       _ref = this.properties;
@@ -345,15 +352,12 @@
         prop = _ref[_i];
         propertiesStr.push(prop.toString());
       }
-      strong = '<span style="font-weight: bold; color: #000; font-size: 1.0em">';
-      stronger = '<span style="font-weight: bold; color: #000; font-size: 1.1em">';
+      strong = '<span class="strong">';
+      stronger = '<span class="stronger">';
       strongClose = '</span>';
-      classOpen = strong + 'class ' + this.name + '(' + strongClose;
-      classClose = strong + ')' + strongClose;
-      returnVal = classOpen + '<div class="modelProperties"><span class="modelProperty">' + propertiesStr.join('</span><span class="modelProperty">') + '</span></div>' + classClose;
-      if (prefix != null) {
-        returnVal = stronger + prefix + strongClose + '<br/>' + returnVal;
-      }
+      classOpen = strong + this.name + ' {' + strongClose;
+      classClose = strong + '}' + strongClose;
+      returnVal = classOpen + '<div>' + propertiesStr.join(',</div><div>') + '</div>' + classClose;
       if (!modelsToIgnore) {
         modelsToIgnore = [];
       }
@@ -362,19 +366,21 @@
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         prop = _ref1[_j];
         if ((prop.refModel != null) && (modelsToIgnore.indexOf(prop.refModel)) === -1) {
-          returnVal = returnVal + ('<br>' + prop.refModel.getMockSignature(void 0, modelsToIgnore));
+          returnVal = returnVal + ('<br>' + prop.refModel.getMockSignature(modelsToIgnore));
         }
       }
       return returnVal;
     };
 
-    SwaggerModel.prototype.createJSONSample = function(modelToIgnore) {
+    SwaggerModel.prototype.createJSONSample = function(modelsToIgnore) {
       var prop, result, _i, _len, _ref;
       result = {};
+      modelsToIgnore = modelsToIgnore || [];
+      modelsToIgnore.push(this.name);
       _ref = this.properties;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         prop = _ref[_i];
-        result[prop.name] = prop.getSampleValue(modelToIgnore);
+        result[prop.name] = prop.getSampleValue(modelsToIgnore);
       }
       return result;
     };
@@ -388,8 +394,9 @@
     function SwaggerModelProperty(name, obj) {
       this.name = name;
       this.dataType = obj.type;
-      this.isArray = this.dataType.toLowerCase() === 'array';
+      this.isCollection = this.dataType && (this.dataType.toLowerCase() === 'array' || this.dataType.toLowerCase() === 'list' || this.dataType.toLowerCase() === 'set');
       this.descr = obj.description;
+      this.required = obj.required;
       if (obj.items != null) {
         if (obj.items.type != null) {
           this.refDataType = obj.items.type;
@@ -408,18 +415,18 @@
       }
     }
 
-    SwaggerModelProperty.prototype.getSampleValue = function(modelToIgnore) {
+    SwaggerModelProperty.prototype.getSampleValue = function(modelsToIgnore) {
       var result;
-      if ((this.refModel != null) && (!(this.refModel === modelToIgnore))) {
-        result = this.refModel.createJSONSample(this.refModel);
+      if ((this.refModel != null) && (modelsToIgnore.indexOf(this.refModel.name) === -1)) {
+        result = this.refModel.createJSONSample(modelsToIgnore);
       } else {
-        if (this.isArray) {
+        if (this.isCollection) {
           result = this.refDataType;
         } else {
           result = this.dataType;
         }
       }
-      if (this.isArray) {
+      if (this.isCollection) {
         return [result];
       } else {
         return result;
@@ -427,16 +434,19 @@
     };
 
     SwaggerModelProperty.prototype.toString = function() {
-      var str;
-      str = '<span class="head"><span class="name">'+this.name + '</span>: <span class="type">' + this.dataTypeWithRef + '</span></span>';
-      str += '<span class="expand" style="display:none;">';
+      var req, str;
+      req = this.required ? 'propReq' : 'propOpt';
+      str = '<span class="propName ' + req + '">' + this.name + '</span> (<span class="propType">' + this.dataTypeWithRef + '</span>';
+      if (!this.required) {
+        str += ', <span class="propOptKey">optional</span>';
+      }
+      str += ')';
       if (this.values != null) {
-        str += " <span class=\"values\"><strong>Possible values:</strong> ['" + this.values.join("' or '") + "']</span>";
+        str += " = <span class='propVals'>['" + this.values.join("' or '") + "']</span>";
       }
       if (this.descr != null) {
-        str += ' <span class="typeDescription"><strong>Description:</strong> ' + this.descr + '</span>';
+        str += ': <span class="propDesc">' + this.descr + '</span>';
       }
-      str += '</span>';
       return str;
     };
 
@@ -540,9 +550,9 @@
         return dataType;
       } else {
         if (listType != null) {
-          return models[listType].getMockSignature(dataType);
+          return models[listType].getMockSignature();
         } else {
-          return models[dataType].getMockSignature(dataType);
+          return models[dataType].getMockSignature();
         }
       }
     };
@@ -776,5 +786,7 @@
   window.SwaggerOperation = SwaggerOperation;
 
   window.SwaggerRequest = SwaggerRequest;
+
+  window.SwaggerModelProperty = SwaggerModelProperty;
 
 }).call(this);
